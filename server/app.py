@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import ipdb
+
 from flask import Flask, jsonify, request, make_response
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
@@ -44,6 +46,24 @@ class PlantByID(Resource):
     def get(self, id):
         plant = Plant.query.filter_by(id=id).first().to_dict()
         return make_response(jsonify(plant), 200)
+    
+    def patch(self, id):
+        plant = Plant.query.filter_by(id=id).first()
+        
+        json_data = request.get_json()
+        for key in json_data:
+            setattr(plant, key, json_data.get(key))
+
+        db.session.commit()
+
+        return make_response(jsonify(plant.to_dict()), 200)
+    
+    def delete(self, id):
+        plant = Plant.query.filter_by(id=id).first()
+        db.session.delete(plant)
+        db.session.commit()
+
+        return make_response(jsonify({}), 204)
 
 api.add_resource(PlantByID, '/plants/<int:id>')
         
